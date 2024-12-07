@@ -16,14 +16,13 @@ class UserType(str, Enum):
 
 
 class UserBase(BaseModel):
+    full_name: str
     username: str
+    e_mail: str
     age: int
     weight: float
-    preference: UserPreference  # Using Enum for validation
-    user_type: UserType  # Using Enum for validation
-
-    class Config:
-        from_attributes = True
+    preference: UserPreference
+    user_type: UserType
 
 
 class UserCreate(UserBase):
@@ -31,7 +30,14 @@ class UserCreate(UserBase):
 
 
 class UserResponse(BaseModel):
-    id: int
+    user_id: int
+    full_name: str
+    username: str
+    e_mail: str
+    age: int
+    weight: float
+    preference: UserPreference
+    user_type: UserType
 
     class Config:
         from_attributes = True
@@ -52,8 +58,8 @@ class RecipeBase(BaseModel):
     calories: int
     carbohydrates: float
     fats: float
-    ingredients: List[str]  # List for multiple ingredients
-    instructions: List[str]  # List for multiple instructions
+    ingredients: List[str]
+    instructions: List[str]
     type: RecipeType
 
     class Config:

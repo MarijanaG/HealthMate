@@ -6,7 +6,6 @@ from app.database import get_db, Base
 from sqlalchemy import Column, Integer, String, Float, Enum
 
 
-
 class User(Base):
     __tablename__ = 'users'
 
@@ -26,9 +25,17 @@ class User(Base):
         nullable=False
     )
 
-    # Establish relationships
-    nutritional_plans = relationship('NutritionalPlan', back_populates='user')
-    recipes = relationship('Recipe', back_populates='user')
+    # Relationships
+    nutritional_plans = relationship(
+        'NutritionalPlan',
+        foreign_keys='NutritionalPlan.user_id',
+        back_populates='user'
+    )
+    nutritionist_plans = relationship(
+        'NutritionalPlan',
+        foreign_keys='NutritionalPlan.nutritionist',
+        back_populates='nutritionist_user'
+    )
 
 
 

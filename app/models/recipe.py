@@ -16,8 +16,3 @@ class Recipe(Base):
     type = Column(
         Enum('vegan', 'vegetarian', 'omnivorous', name='dietary_preference'),
         nullable=False)
-
-    # Establish relationships
-    meal_plan = relationship('MealPlan', back_populates='recipes')
-    user_id = Column(Integer, ForeignKey('users.user_id'))
-    user = relationship('User', back_populates='recipes')

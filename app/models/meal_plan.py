@@ -12,4 +12,4 @@ class MealPlan(Base):
 
     # Establish relationships
     nutritional_plan = relationship('NutritionalPlan', back_populates='meal_plan')
-    recipes = relationship('Recipe', back_populates='meal_plan')
+    #recipes = relationship('Recipe', back_populates='meal_plan')

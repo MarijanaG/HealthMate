@@ -14,24 +14,6 @@ class NutritionalPlan(Base):
     carbohydrates = Column(Float)
     fats = Column(Float)
 
-
-    user = relationship(
-        'User',
-        foreign_keys=[user_id],
-        back_populates='nutritional_plans'
-    )
-    nutritionist_user = relationship(
-        'User',
-        foreign_keys=[nutritionist],
-        back_populates='nutritionist_plans'
-    )
-    recipes = relationship(
-        'Recipe',
-        back_populates='meal_plan'
-    )
-    meal_plan = relationship(
-        'MealPlan',
-        back_populates='nutritional_plan',
-        uselist=False
-    )
-
+    user = relationship('User', foreign_keys=[user_id], back_populates='nutritional_plans')
+    nutritionist_user = relationship('User', foreign_keys=[nutritionist], back_populates='nutritionist_plans')
+    meal_plan = relationship('MealPlan', back_populates='nutritional_plan', uselist=False)
