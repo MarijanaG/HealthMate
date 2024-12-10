@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.models.nutritional_plan import NutritionalPlan
-from app.schemas import NutritionalPlanCreate, NutritionalPlanResponse
+from app.schemas import NutritionalPlanCreate, NutritionalPlanResponse, NutritionalPlanUpdate
 from app.database import get_db
 from typing import List
 
@@ -23,14 +23,16 @@ def get_all_nutritional_plans(db: Session = Depends(get_db)):
     return db.query(NutritionalPlan).all()
 
 
-@router.put("/{plan_id}", response_model=NutritionalPlanResponse)
-def update_nutritional_plan(plan_id: int, updated_plan: NutritionalPlanCreate, db: Session = Depends(get_db)):
+@router.patch("/{plan_id}", response_model=NutritionalPlanResponse)
+def patch_nutritional_plan(plan_id: int, updated_plan: NutritionalPlanUpdate, db: Session = Depends(get_db)):
+    # Find the nutritional plan by ID
     nutritional_plan = db.query(NutritionalPlan).filter(NutritionalPlan.plan_id == plan_id).first()
     if not nutritional_plan:
         raise HTTPException(status_code=404, detail="Nutritional plan not found")
 
-    # Update fields
-    for key, value in updated_plan.dict().items():
+    # Update only the fields provided in the request
+    update_data = updated_plan.dict(exclude_unset=True)
+    for key, value in update_data.items():
         setattr(nutritional_plan, key, value)
 
     db.commit()

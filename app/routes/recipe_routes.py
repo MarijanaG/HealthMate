@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from app.schemas import RecipeCreate, RecipeResponse
+from app.schemas import RecipeCreate, RecipeResponse, RecipeUpdate
 from app.models.recipe import Recipe
 from app.database import get_db
 from typing import List
@@ -31,13 +31,15 @@ def get_all_recipes(db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail="Error fetching recipes")
 
 
-@router.put("/{recipe_id}", response_model=RecipeResponse)
-def update_recipe(recipe_id: int, updated_recipe: RecipeCreate, db: Session = Depends(get_db)):
+@router.patch("/{recipe_id}", response_model=RecipeResponse)
+def patch_recipe(recipe_id: int, updated_recipe: RecipeUpdate, db: Session = Depends(get_db)):
     recipe = db.query(Recipe).filter(Recipe.recipe_id == recipe_id).first()
     if recipe is None:
         raise HTTPException(status_code=404, detail="Recipe not found")
 
-    for key, value in updated_recipe.dict().items():
+    # Only update fields provided in the request body
+    update_data = updated_recipe.dict(exclude_unset=True)
+    for key, value in update_data.items():
         setattr(recipe, key, value)
 
     try:

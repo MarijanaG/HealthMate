@@ -5,7 +5,7 @@ from app.models.meal_plan import MealPlan
 from app.database import get_db
 from typing import List
 from app import MealPlanCreate, MealPlanResponse
-
+from app.schemas import MealPlanUpdate
 
 router = APIRouter()
 
@@ -24,20 +24,25 @@ def get_all_meal_plans(db: Session = Depends(get_db)):
     return db.query(MealPlan).all()
 
 
-@router.put("/{meal_plan_id}", response_model=MealPlanResponse)
-def update_meal_plan(meal_plan_id: int, updated_meal_plan: MealPlanCreate, db: Session = Depends(get_db)):
+@router.patch("/{meal_plan_id}", response_model=MealPlanResponse)
+def patch_meal_plan(meal_plan_id: int, updated_meal_plan: MealPlanUpdate, db: Session = Depends(get_db)):
     # Find the meal plan by ID
     meal_plan = db.query(MealPlan).filter(MealPlan.meal_plan_id == meal_plan_id).first()
     if not meal_plan:
         raise HTTPException(status_code=404, detail="Meal plan not found")
 
-    # Update the meal plan fields with the new data
-    for key, value in updated_meal_plan.dict().items():
+    # Update only the fields that are provided in the request body
+    update_data = updated_meal_plan.dict(exclude_unset=True)
+    for key, value in update_data.items():
         setattr(meal_plan, key, value)
 
-    db.commit()
-    db.refresh(meal_plan)
-    return meal_plan
+    try:
+        db.commit()
+        db.refresh(meal_plan)
+        return meal_plan
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Error updating meal plan")
 
 
 @router.delete("/{meal_plan_id}", status_code=status.HTTP_204_NO_CONTENT)

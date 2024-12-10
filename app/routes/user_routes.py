@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from app.schemas import UserCreate, UserResponse
+from app.schemas import UserCreate, UserResponse, UserUpdate
 from app.models.user import User
 from app.database import SessionLocal
 from typing import List
@@ -46,16 +46,18 @@ def get_all_users(db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail="Error fetching users")
 
 
-@router.put("/{user_id}", response_model=UserResponse, operation_id="update_user")
-def update_user(user_id: int, updated_user: UserCreate, db: Session = db_dependency):
+@router.patch("/{user_id}", response_model=UserResponse, operation_id="update_user")
+def update_user(user_id: int, updated_user: UserUpdate, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.user_id == user_id).first()
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
 
     # Only update fields that are provided
-    if updated_user.password:
-        updated_user.password = get_password_hash(updated_user.password)
-    for key, value in updated_user.dict().items():
+    updated_data = updated_user.dict(exclude_unset=True)  # Ignore fields not provided
+    if 'password' in updated_data:  # Hash the password if it's being updated
+        updated_data['password'] = get_password_hash(updated_data['password'])
+
+    for key, value in updated_data.items():
         setattr(user, key, value)
 
     try:
