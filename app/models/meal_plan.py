@@ -7,9 +7,8 @@ class MealPlan(Base):
 
     meal_plan_id = Column(Integer, primary_key=True, autoincrement=True)
     plan_id = Column(Integer, ForeignKey('nutritional_plan.plan_id'))
+    description = Column(String, nullable=True)
     start_date = Column(Date)
     end_date = Column(Date)
 
-    # Establish relationships
     nutritional_plan = relationship('NutritionalPlan', back_populates='meal_plan')
-    #recipes = relationship('Recipe', back_populates='meal_plan')

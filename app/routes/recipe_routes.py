@@ -7,6 +7,7 @@ from typing import List
 
 router = APIRouter()
 
+
 @router.post("/", response_model=RecipeResponse)
 def create_recipe(recipe: RecipeCreate, db: Session = Depends(get_db)):
     # Create a new recipe instance
@@ -17,8 +18,10 @@ def create_recipe(recipe: RecipeCreate, db: Session = Depends(get_db)):
         db.refresh(new_recipe)
         return new_recipe
     except Exception as e:
+        print(f"Error creating recipe: {e}")
         db.rollback()  # Rollback if an error occurs during commit
         raise HTTPException(status_code=500, detail="Error creating recipe")
+
 
 @router.get("/", response_model=List[RecipeResponse])
 def get_all_recipes(db: Session = Depends(get_db)):
@@ -27,3 +30,36 @@ def get_all_recipes(db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail="Error fetching recipes")
 
+
+@router.put("/{recipe_id}", response_model=RecipeResponse)
+def update_recipe(recipe_id: int, updated_recipe: RecipeCreate, db: Session = Depends(get_db)):
+    recipe = db.query(Recipe).filter(Recipe.recipe_id == recipe_id).first()
+    if recipe is None:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+
+    for key, value in updated_recipe.dict().items():
+        setattr(recipe, key, value)
+
+    try:
+        db.commit()
+        db.refresh(recipe)
+        return recipe
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Error updating recipe")
+
+
+# Delete a recipe by ID
+@router.delete("/{recipe_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_recipe(recipe_id: int, db: Session = Depends(get_db)):
+    recipe = db.query(Recipe).filter(Recipe.recipe_id == recipe_id).first()
+    if recipe is None:
+        raise HTTPException(status_code=404, detail="Recipe not found")
+
+    try:
+        db.delete(recipe)
+        db.commit()
+        return None  # Return a 204 No Content status
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Error deleting recipe")

@@ -15,7 +15,7 @@ from app.routes.nutritional_plan_routes import router as nutritional_plan_router
 from typing import Annotated
 from pydantic import BaseModel
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from app.database import get_db,SessionLocal, initialize_database
+from app.database import get_db, SessionLocal, initialize_database
 from passlib.context import CryptContext
 from app.utils import verify_password
 from app.models import User
@@ -27,7 +27,7 @@ app.include_router(user_router, prefix="/users", tags=["Users"])
 app.include_router(recipe_router, prefix="/recipes", tags=["Recipes"])
 app.include_router(meal_plan_router, prefix="/meal-plans", tags=["Meal Plans"])
 app.include_router(motivation_router, prefix="/motivations", tags=["Motivations"])
-app.include_router(user_router, prefix="/users", tags=["Users"])
+app.include_router(nutritional_plan_router, prefix="/nutritional-plans", tags=["Nutritional Plans"])
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -44,26 +44,6 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: str
-
-
-'''class DietaryPreference(str, Enum):
-    VEGAN = "vegan"
-    VEGETARIAN = "vegetarian"
-    OMNIVOROUS = "omnivorous"
-
-
-class User(BaseModel):
-    username: str
-    full_name: str
-    e_mail: str
-    disabled: bool | None = None
-    age: int
-    weight: float
-    preference: DietaryPreference
-
-
-class UserInDB(User):
-    hashed_password: str'''
 
 
 def get_user(db: Session, username: str):
@@ -95,14 +75,18 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: An
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
+        print(f"Decoded username: {username}")
+
         if username is None:
             raise credentials_exception
         token_data = TokenData(username=username)
     except JWTError:
+        print("JWT decoding failed")
         raise credentials_exception
 
     user = get_user(db, username=token_data.username)
     if user is None:
+        print("User not found in database")
         raise credentials_exception
     return user
 

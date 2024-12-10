@@ -1,3 +1,4 @@
+from datetime import date
 from pydantic import BaseModel
 from typing import List, Optional
 from enum import Enum
@@ -58,8 +59,6 @@ class RecipeBase(BaseModel):
     calories: int
     carbohydrates: float
     fats: float
-    ingredients: List[str]
-    instructions: List[str]
     type: RecipeType
 
     class Config:
@@ -79,23 +78,23 @@ class RecipeResponse(RecipeBase):
 
 # Meal Plan Schemas
 class MealPlanBase(BaseModel):
-    name: str
     description: str
-    user_id: int
+    start_date: date
+    end_date: date
 
     class Config:
         from_attributes = True
 
 
 class MealPlanCreate(BaseModel):
-    name: str
     description: Optional[str] = None
+    start_date: date
+    end_date: date
+    plan_id: int
 
 
 class MealPlanResponse(BaseModel):
-    id: int
-    name: str
-    description: Optional[str] = None
+    meal_plan_id: int
 
     class Config:
         from_attributes = True
@@ -109,9 +108,7 @@ class NutritionalType(str, Enum):
 
 # Base schema for nutritional plan
 class NutritionalPlanBase(BaseModel):
-    name: str
-    description: str
-    calories: float
+    calories: int
     protein: float
     carbohydrates: float
     fats: float
@@ -126,7 +123,7 @@ class NutritionalPlanCreate(NutritionalPlanBase):
 
 
 class NutritionalPlanResponse(NutritionalPlanBase):
-    id: int
+    plan_id: int
 
     class Config:
         from_attributes = True
