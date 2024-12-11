@@ -4,6 +4,15 @@ from typing import List, Optional
 from enum import Enum
 
 
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
+class TokenData(BaseModel):
+    username: str
+
+
 # User Schemas
 class UserPreference(str, Enum):
     vegan = "vegan"

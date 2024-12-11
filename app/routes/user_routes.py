@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from app.auth import get_current_user
 from app.schemas import UserCreate, UserResponse, UserUpdate
 from app.models.user import User
 from app.database import SessionLocal
@@ -17,23 +18,32 @@ def get_db():
 
 db_dependency = Depends(get_db)
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/users",
+    tags=["Users"],
+    dependencies=[Depends(get_current_user)]
+)
 
 
 @router.post("/", response_model=UserResponse, operation_id="create_user")
 def create_user(user: UserCreate, db: Session = db_dependency):
     existing_user = db.query(User).filter_by(e_mail=user.e_mail).first()
     if existing_user:
+
         raise HTTPException(status_code=400, detail="Email already exists")
     user.password = get_password_hash(user.password)
+
     new_user = User(**user.dict())
 
     try:
+
         db.add(new_user)
         db.commit()
         db.refresh(new_user)
+
         return new_user
     except Exception as e:
+
         db.rollback()
         raise HTTPException(status_code=500, detail="Error creating user")
 
@@ -71,7 +81,7 @@ def update_user(user_id: int, updated_user: UserUpdate, db: Session = Depends(ge
 
 # Delete a user by ID
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT, operation_id="delete_user")
-def delete_user(user_id: int, db: Session = db_dependency):
+def delete_user(user_id: int, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.user_id == user_id).first()
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
