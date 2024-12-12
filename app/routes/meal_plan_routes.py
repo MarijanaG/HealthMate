@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from starlette import status
+
+from app.models import Recipe
 from app.models.meal_plan import MealPlan
 from app.database import get_db
 from typing import List
@@ -51,6 +53,7 @@ def delete_meal_plan(meal_plan_id: int, db: Session = Depends(get_db)):
     meal_plan = db.query(MealPlan).filter(MealPlan.meal_plan_id == meal_plan_id).first()
     if not meal_plan:
         raise HTTPException(status_code=404, detail="Meal plan not found")
+    db.query(Recipe).filter(Recipe.meal_plan_id == meal_plan_id).delete()
 
     # Delete the meal plan
     db.delete(meal_plan)

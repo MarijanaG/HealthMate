@@ -184,6 +184,7 @@ class NutritionalPlanResponse(NutritionalPlanBase):
 
 
 class MotivationBase(BaseModel):
+    message_id: int
     message: str
 
     class Config:
@@ -195,7 +196,7 @@ class MotivationCreate(MotivationBase):
 
 
 class MotivationResponse(MotivationBase):
-    id: int
+    pass
 
     class Config:
         from_attributes = True
