@@ -72,7 +72,7 @@ class RecipeType(str, Enum):
 
 
 class RecipeBase(BaseModel):
-    meal_plan_id: int
+    #meal_plan_id: int
     name_recipe: str
     description: Optional[str] = None
     portion: float

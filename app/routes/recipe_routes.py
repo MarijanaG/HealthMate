@@ -18,7 +18,7 @@ router = APIRouter(
 @router.post("/{meal_plan_id}", response_model=RecipeResponse)
 def create_recipe(meal_plan_id: int, recipe: RecipeCreate, db: Session = Depends(get_db)):
     # Create a new recipe instance
-    new_recipe = Recipe(**recipe.dict(exclude={"meal_plan_id"}), meal_plan_id=meal_plan_id)
+    new_recipe = Recipe(**recipe.dict(), meal_plan_id=meal_plan_id)
     try:
         db.add(new_recipe)
         db.commit()
