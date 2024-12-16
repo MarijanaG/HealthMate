@@ -120,7 +120,8 @@ class MealPlanBase(BaseModel):
 
 
 class MealPlanCreate(MealPlanBase):
-    plan_id: int  # Required for creation
+    #plan_id: int  # Required for creation
+    pass
 
 
 class MealPlanUpdate(BaseModel):

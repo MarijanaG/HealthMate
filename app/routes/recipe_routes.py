@@ -18,7 +18,7 @@ router = APIRouter(
 @router.post("/{meal_plan_id}", response_model=RecipeResponse)
 def create_recipe(meal_plan_id: int, recipe: RecipeCreate, db: Session = Depends(get_db)):
     # Create a new recipe instance
-    new_recipe = Recipe(**recipe.dict(), meal_plan_id = meal_plan_id)
+    new_recipe = Recipe(**recipe.dict(exclude={"meal_plan_id"}), meal_plan_id=meal_plan_id)
     try:
         db.add(new_recipe)
         db.commit()
@@ -33,10 +33,11 @@ def create_recipe(meal_plan_id: int, recipe: RecipeCreate, db: Session = Depends
 @router.get("/{meal_plan_id}", response_model=List[RecipeResponse])
 def get_all_recipes(meal_plan_id: int, db: Session = Depends(get_db)):
     try:
-        recipes = db.query(Recipe).filter(Recipe.meal_plan_id == meal_plan_id)
+        recipes = db.query(Recipe).filter(Recipe.meal_plan_id == meal_plan_id).all()
 
         if not recipes:
             raise HTTPException(status_code=404, detail="No recipes found for this meal plan")
+        return recipes
 
     except Exception as e:
         raise HTTPException(status_code=500, detail="Error fetching recipes")
