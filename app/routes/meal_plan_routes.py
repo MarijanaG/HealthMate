@@ -1,35 +1,52 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from starlette import status
-
+from app.auth import get_current_user
 from app.models import Recipe
+from app.models.nutritional_plan import NutritionalPlan
 from app.models.meal_plan import MealPlan
 from app.database import get_db
 from typing import List
 from app import MealPlanCreate, MealPlanResponse
 from app.schemas import MealPlanUpdate
+from sqlalchemy import and_
 
-router = APIRouter()
+
+router = APIRouter(
+    prefix="/meal-plans",
+    tags=["Meal Plans"],
+    dependencies=[Depends(get_current_user)]
+)
 
 
-@router.post("/", response_model=MealPlanResponse)
-def create_meal_plan(meal_plan: MealPlanCreate, db: Session = Depends(get_db)):
-    new_meal_plan = MealPlan(**meal_plan.dict())
+@router.post("/{{plan_id}", response_model=MealPlanResponse)
+def create_meal_plan(plan_id: int, meal_plan: MealPlanCreate, db: Session = Depends(get_db)):
+    new_meal_plan = MealPlan(**meal_plan.dict(), plan_id=plan_id)
     db.add(new_meal_plan)
     db.commit()
     db.refresh(new_meal_plan)
     return new_meal_plan
 
 
-@router.get("/", response_model=List[MealPlanResponse])
+@router.get("/{user_id}/{plan_id}", response_model=List[MealPlanResponse])
+def get_user_meal_plans(plan_id: int, user_id: int, db: Session = Depends(get_db)):
+    result = db.query(MealPlan).filter(and_(MealPlan.plan_id == plan_id), (NutritionalPlan.user_id == user_id))
+    return result
+
+'''@router.get("/", response_model=List[MealPlanResponse])
 def get_all_meal_plans(db: Session = Depends(get_db)):
-    return db.query(MealPlan).all()
+    return db.query(MealPlan).all()'''
 
 
-@router.patch("/{meal_plan_id}", response_model=MealPlanResponse)
-def patch_meal_plan(meal_plan_id: int, updated_meal_plan: MealPlanUpdate, db: Session = Depends(get_db)):
+@router.patch("/{user_id}/{plan_id}", response_model=MealPlanResponse)
+def patch_meal_plan(user_id: int,plan_id: int, updated_meal_plan: MealPlanUpdate, db: Session = Depends(get_db)):
     # Find the meal plan by ID
-    meal_plan = db.query(MealPlan).filter(MealPlan.meal_plan_id == meal_plan_id).first()
+    meal_plan = (
+        db.query(MealPlan)
+        .join(NutritionalPlan, NutritionalPlan.plan_id == MealPlan.plan_id)
+        .filter(MealPlan.plan_id == plan_id, NutritionalPlan.user_id == user_id)
+        .first()
+    )
     if not meal_plan:
         raise HTTPException(status_code=404, detail="Meal plan not found")
 
@@ -47,13 +64,19 @@ def patch_meal_plan(meal_plan_id: int, updated_meal_plan: MealPlanUpdate, db: Se
         raise HTTPException(status_code=500, detail="Error updating meal plan")
 
 
-@router.delete("/{meal_plan_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_meal_plan(meal_plan_id: int, db: Session = Depends(get_db)):
+@router.delete("/{user_id}/{plan_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_meal_plan(user_id: int, plan_id: int, db: Session = Depends(get_db)):
     # Find the meal plan by ID
-    meal_plan = db.query(MealPlan).filter(MealPlan.meal_plan_id == meal_plan_id).first()
+    meal_plan = (
+        db.query(MealPlan)
+        .join(NutritionalPlan, NutritionalPlan.plan_id == MealPlan.plan_id)
+        .filter(MealPlan.plan_id == plan_id, NutritionalPlan.user_id == user_id)
+        .first()
+    )
+
     if not meal_plan:
         raise HTTPException(status_code=404, detail="Meal plan not found")
-    db.query(Recipe).filter(Recipe.meal_plan_id == meal_plan_id).delete()
+    db.query(Recipe).filter(Recipe.meal_plan_id == plan_id).delete()
 
     # Delete the meal plan
     db.delete(meal_plan)

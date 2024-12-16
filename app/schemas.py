@@ -178,6 +178,9 @@ class NutritionalPlanUpdate(BaseModel):
 
 class NutritionalPlanResponse(NutritionalPlanBase):
     plan_id: int
+    user_id: int
+    nutritionist: int
+    meal_plan: List[MealPlanBase] = []
 
     class Config:
         from_attributes = True

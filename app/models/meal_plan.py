@@ -6,7 +6,7 @@ class MealPlan(Base):
     __tablename__ = 'meal_plan'
 
     meal_plan_id = Column(Integer, primary_key=True, autoincrement=True)
-    plan_id = Column(Integer, ForeignKey('nutritional_plan.plan_id'))
+    plan_id = Column(Integer, ForeignKey('nutritional_plan.plan_id', ondelete='CASCADE'))
     description = Column(String, nullable=True)
     start_date = Column(Date)
     end_date = Column(Date)

@@ -7,7 +7,7 @@ class Recipe(Base):
     __tablename__ = 'recipes'
 
     recipe_id = Column(Integer, primary_key=True, autoincrement=True)
-    meal_plan_id = Column(Integer, ForeignKey('meal_plan.meal_plan_id'))
+    meal_plan_id = Column(Integer, ForeignKey('meal_plan.meal_plan_id', ondelete='CASCADE'))
     name_recipe = Column(String)
     description = Column(Text)
     portion = Column(Float)
