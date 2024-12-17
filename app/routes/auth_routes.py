@@ -48,10 +48,6 @@ async def login_for_access_token(
     return Token(access_token=access_token, token_type="bearer")
 
 
-'''@router.get("/")
-def read_root():
-    return {"message": "Hello beautiful world"}'''
-
 @router.get("/")
 async def root_redirect():
     return RedirectResponse(url="/docs")

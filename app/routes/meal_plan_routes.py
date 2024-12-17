@@ -33,10 +33,6 @@ def get_user_meal_plans(plan_id: int, user_id: int, db: Session = Depends(get_db
     result = db.query(MealPlan).filter(and_(MealPlan.plan_id == plan_id), (NutritionalPlan.user_id == user_id))
     return result
 
-'''@router.get("/", response_model=List[MealPlanResponse])
-def get_all_meal_plans(db: Session = Depends(get_db)):
-    return db.query(MealPlan).all()'''
-
 
 @router.patch("/{user_id}/{plan_id}", response_model=MealPlanResponse)
 def patch_meal_plan(user_id: int,plan_id: int, updated_meal_plan: MealPlanUpdate, db: Session = Depends(get_db)):

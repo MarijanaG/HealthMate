@@ -27,7 +27,7 @@ def create_nutritional_plan(user_id: int, nutritionist: int, nutritional_plan: N
 
 @router.get("/{user_id}/{nutritionist}", response_model=List[NutritionalPlanResponse])
 def get_user_nutritional_plans(user_id: int, nutritionist: int, db: Session = Depends(get_db)):
-    result = db.query(NutritionalPlan).filter(NutritionalPlan.user_id == user_id, NutritionalPlan.nutritionist_id == nutritionist)
+    result = db.query(NutritionalPlan).filter(NutritionalPlan.user_id == user_id, NutritionalPlan.nutritionist == nutritionist)
     return result
 
 

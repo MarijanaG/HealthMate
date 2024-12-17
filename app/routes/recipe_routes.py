@@ -67,6 +67,7 @@ def patch_recipe(meal_plan_id: int, recipe_id: int, updated_recipe: RecipeUpdate
         db.rollback()
         raise HTTPException(status_code=500, detail="Error updating recipe")
 
+
 # Delete a recipe by ID
 @router.delete("/{meal_plan_id}/{recipe_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_recipe(meal_plan_id: int, recipe_id: int, db: Session = Depends(get_db)):
