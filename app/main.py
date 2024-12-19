@@ -6,6 +6,7 @@ from fastapi import FastAPI, Depends, HTTPException, status
 from jwt.exceptions import InvalidTokenError
 from starlette.responses import RedirectResponse
 from app.auth import get_current_user
+from app.database import initialize_database
 from app.routes.user_routes import router as user_router
 from app.routes.motivational import router as motivation_router
 from app.routes.recipe_routes import router as recipe_router
@@ -26,7 +27,7 @@ app.include_router(motivation_router, prefix="/motivations", tags=["Motivations"
 app.include_router(auth_router, tags=["Auth"])
 
 
-#initialize_database()
+initialize_database()
 
 
 if __name__ == "__main__":

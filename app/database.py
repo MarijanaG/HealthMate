@@ -12,9 +12,9 @@ load_dotenv()
 # Database configuration
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql://postgres:galena2612@localhost/healthmate",
+    "postgresql://healthmate_qwqc_user:9n3GPfnf0J13AsHYbUYnydoUvjzoXVY2@dpg-ctgtokrtq21c73aba1f0-a.frankfurt-postgres.render.com/healthmate_qwqc",
 )
-
+#"postgresql://postgres:galena2612@localhost/healthmate",
 # SQLAlchemy engine and session setup
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -22,8 +22,9 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def initialize_database():
     """Initialize the database and create all tables."""
-    from app.models import Base
     Base.metadata.create_all(bind=engine)
+
+
 
 
 def get_db():

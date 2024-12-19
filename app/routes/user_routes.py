@@ -21,7 +21,6 @@ db_dependency = Depends(get_db)
 router = APIRouter(
     prefix="/users",
     tags=["Users"],
-    dependencies=[Depends(get_current_user)]
 )
 
 
@@ -48,7 +47,7 @@ def create_user(user: UserCreate, db: Session = db_dependency):
         raise HTTPException(status_code=500, detail="Error creating user")
 
 
-@router.get("/", response_model=List[UserResponse], operation_id="get_all_users")
+@router.get("/", response_model=List[UserResponse], operation_id="get_all_users", dependencies=[Depends(get_current_user)])
 def get_all_users(db: Session = Depends(get_db)):
     try:
         return db.query(User).all()
@@ -56,7 +55,7 @@ def get_all_users(db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail="Error fetching users")
 
 
-@router.patch("/{user_id}", response_model=UserResponse, operation_id="update_user")
+@router.patch("/{user_id}", response_model=UserResponse, operation_id="update_user", dependencies=[Depends(get_current_user)])
 def update_user(user_id: int, updated_user: UserUpdate, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.user_id == user_id).first()
     if user is None:
@@ -80,7 +79,7 @@ def update_user(user_id: int, updated_user: UserUpdate, db: Session = Depends(ge
 
 
 # Delete a user by ID
-@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT, operation_id="delete_user")
+@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT, operation_id="delete_user", dependencies=[Depends(get_current_user)])
 def delete_user(user_id: int, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.user_id == user_id).first()
     if user is None:

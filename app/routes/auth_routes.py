@@ -54,7 +54,7 @@ async def root_redirect():
 
 
 @router.get("/users/")
-async def get_users(db: Annotated[Session, Depends(get_db)]):
+async def get_users(db: Annotated[Session, Depends(get_db)], current_user: Annotated[User, Depends(get_current_user)]):
     try:
         users = db.query(User).all()
         return users
